@@ -1,6 +1,7 @@
 package data_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -146,8 +147,6 @@ func ExampleRequest() {
 
 // ExampleInstructions_Decode shows reading structured instructions back off
 // the wire, including a context key this library has no helper for.
-//
-//nolint:lll // the Output block must match the encoder byte for byte.
 func ExampleInstructions_Decode() {
 	raw := []byte(`{
 		"type": "noul",
@@ -179,5 +178,29 @@ func ExampleInstructions_Decode() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("re-encoded: %s\n", out)
+
+	// The encoder emits compact JSON on one line; it is indented here only so
+	// the expected output below stays readable and within the line limit.
+	var pretty bytes.Buffer
+	if err := json.Indent(&pretty, out, "", "  "); err != nil {
+		panic(err)
+	}
+	fmt.Printf("re-encoded:\n%s\n", &pretty)
+	// Output:
+	// question: Does `extracted_value` match the `field`?
+	// field: amount_due (number, USD)
+	// tolerance: {"percent": 0.5}
+	// re-encoded:
+	// {
+	//   "extracted_value": 4471,
+	//   "field": {
+	//     "name": "amount_due",
+	//     "type": "number",
+	//     "unit": "USD"
+	//   },
+	//   "question": "Does `extracted_value` match the `field`?",
+	//   "tolerance": {
+	//     "percent": 0.5
+	//   }
+	// }
 }
