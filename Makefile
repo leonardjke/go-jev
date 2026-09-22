@@ -1,4 +1,4 @@
-.PHONY: all build test test-e2e cover fmt vet lint tidy clean
+.PHONY: all build test test-e2e cover fmt vet lint lint-fix tidy clean
 
 all: fmt vet test
 
@@ -23,7 +23,10 @@ vet:
 	go vet ./...
 
 lint:
-	golangci-lint run
+	docker run --rm -i -v $$(pwd):/src -w /src golangci/golangci-lint:v2.12.2-alpine golangci-lint run ./...
+
+lint-fix:
+	docker run --rm -i -v $$(pwd):/src -w /src golangci/golangci-lint:v2.12.2-alpine golangci-lint run --fix ./...
 
 tidy:
 	go mod tidy

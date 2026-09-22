@@ -1,7 +1,5 @@
 package log
 
-type NoopLogger struct {
-}
+type NoopLogger struct{}
 
-func (n NoopLogger) Debug(msg string, args ...any) {
-}
+func (NoopLogger) Debug(_ string, _ ...any) {}

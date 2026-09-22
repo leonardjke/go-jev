@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func newTestClient(t *testing.T, respBody string) (*jev.Jev, *[]byte) {
+func newTestClient(t *testing.T) (*jev.Jev, *[]byte) {
 	t.Helper()
 
 	var got []byte
@@ -22,7 +22,7 @@ func newTestClient(t *testing.T, respBody string) (*jev.Jev, *[]byte) {
 		got = body
 
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = io.WriteString(w, respBody)
+		_, _ = io.WriteString(w, stubResponse)
 	}))
 	t.Cleanup(srv.Close)
 
@@ -32,10 +32,14 @@ func newTestClient(t *testing.T, respBody string) (*jev.Jev, *[]byte) {
 	return client, &got
 }
 
-const stubResponse = `{"model":"jev-latest","answers":{"is_urgent":{"type":"noul","noul":0.9}},"usage":{"input_tokens":1,"output_tokens":2}}`
+const stubResponse = `{
+	"model": "jev-latest",
+	"answers": {"is_urgent": {"type": "noul", "noul": 0.9}},
+	"usage": {"input_tokens": 1, "output_tokens": 2}
+}`
 
 func TestRequest_WireShape(t *testing.T) {
-	client, got := newTestClient(t, stubResponse)
+	client, got := newTestClient(t)
 
 	resp, err := client.Request(t.Context(), "the state",
 		jev.Noul("is_urgent", "The message conveys urgency"),
@@ -76,11 +80,11 @@ func TestRequest_WireShape(t *testing.T) {
 	}`, string(*got))
 
 	require.NotNil(t, resp.Answers["is_urgent"].Noul)
-	assert.Equal(t, 0.9, *resp.Answers["is_urgent"].Noul)
+	assert.InDelta(t, 0.9, *resp.Answers["is_urgent"].Noul, 1e-9)
 }
 
 func TestRequest_NoulCriteriaAreOptional(t *testing.T) {
-	client, got := newTestClient(t, stubResponse)
+	client, got := newTestClient(t)
 
 	_, err := client.Request(t.Context(), "s",
 		jev.Noul("plain", "A plain check"),
@@ -100,7 +104,7 @@ func TestRequest_NoulCriteriaAreOptional(t *testing.T) {
 }
 
 func TestRequest_Rejects(t *testing.T) {
-	client, got := newTestClient(t, stubResponse)
+	client, got := newTestClient(t)
 
 	t.Run("no questions", func(t *testing.T) {
 		_, err := client.Request(t.Context(), "s")
@@ -125,7 +129,7 @@ func TestRequest_Rejects(t *testing.T) {
 			jev.Noul("ok", "fine"),
 			jev.Noul("broken", "q").Set("tolerance", make(chan int)),
 		)
-		assert.ErrorContains(t, err, `question "broken"`)
+		require.ErrorContains(t, err, `question "broken"`)
 		assert.ErrorContains(t, err, `key "tolerance"`)
 	})
 
@@ -133,7 +137,7 @@ func TestRequest_Rejects(t *testing.T) {
 }
 
 func TestRequest_QuestionsDoNotAliasEachOther(t *testing.T) {
-	client, got := newTestClient(t, stubResponse)
+	client, got := newTestClient(t)
 
 	base := jev.Noul("base", "Does `extracted_value` match?")
 	withValue := base.WithExtractedValue("4471")

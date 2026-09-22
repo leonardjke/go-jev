@@ -1,17 +1,104 @@
 version: "2"
-
+run:
+  modules-download-mode: readonly
+  timeout: 5m
+output:
+  formats:
+    text:
+      path: stdout
+    junit-xml:
+      path: lint.xml
 linters:
   enable:
-    - errcheck
-    - govet
-    - ineffassign
-    - staticcheck
-    - unused
+    - asasalint
+    - asciicheck
+    - bidichk
     - bodyclose
+    - contextcheck
+    - durationcheck
+    - errchkjson
+    - errname
     - errorlint
-    - misspell
+    - exhaustive
+    - lll
+    - gocheckcompilerdirectives
+    - gochecksumtype
+    - gosec
+    - gosmopolitan
+    - loggercheck
+    - makezero
+    - musttag
+    - nakedret
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - noctx
+    - nolintlint
+    - predeclared
+    - protogetter
+    - reassign
+    - recvcheck
     - revive
-
+    - rowserrcheck
+    - spancheck
+    - sqlclosecheck
+    - staticcheck
+    - testifylint
+    - unparam
+    - usestdlibvars
+    - zerologlint
+  settings:
+    lll:
+      line-length: 120
+    gosec:
+      excludes:
+        - G115
+        - G703
+        - G704
+    testifylint:
+      enable:
+        - bool-compare
+        - compares
+        - empty
+        - error-is-as
+        - error-nil
+        - expected-actual
+        - float-compare
+        - len
+        - require-error
+        - suite-extra-assert-call
+        - suite-thelper
+      disable:
+        - go-require
+        - nil-compare
+        - suite-dont-use-pkg
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules: [ ]
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 formatters:
   enable:
+    - gci
     - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+      custom-order: true
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

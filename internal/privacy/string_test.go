@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+//nolint:gosec // G101: a stand-in key for the test, not a real credential.
 const secret = "sk-live-supersecret"
 
 func TestSensitiveString_Redacts(t *testing.T) {
@@ -37,7 +38,7 @@ func TestSensitiveString_Redacts(t *testing.T) {
 			APIKey privacy.SensitiveString
 		}{ss}
 
-		j, err := json.Marshal(holder)
+		j, err := json.Marshal(holder) //nolint:gosec,musttag // marshaling the secret-shaped field is the point of the test.
 		require.NoError(t, err)
 		assert.NotContains(t, string(j), secret)
 

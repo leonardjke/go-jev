@@ -32,7 +32,8 @@ func TestClient_NeverPrintsAPIKey(t *testing.T) {
 	})
 
 	t.Run("marshaled", func(t *testing.T) {
-		out, err := json.Marshal(client)
+		// Jev has no exported fields today; the canary is that it stays that way.
+		out, err := json.Marshal(client) //nolint:staticcheck // SA9005: deliberate.
 		require.NoError(t, err)
 		assert.NotContains(t, string(out), canaryKey)
 	})

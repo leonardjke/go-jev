@@ -24,7 +24,9 @@ func TestClient_NeverPrintsAPIKey(t *testing.T) {
 		assert.NotContains(t, fmt.Sprintf(format, &c), canaryKey, format+" on *Client")
 	}
 
-	out, err := json.Marshal(c)
+	// Client is never marshaled in anger; this is a leak canary for APIKey losing
+	// its type. HTTP is nil here, so the func fields SA1026 warns about never come up.
+	out, err := json.Marshal(c) //nolint:gosec,musttag,staticcheck // see above
 	require.NoError(t, err)
 	assert.NotContains(t, string(out), canaryKey)
 

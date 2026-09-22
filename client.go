@@ -10,7 +10,7 @@ import (
 	"github.com/leonardjke/go-jev/internal/transport"
 )
 
-type Jev struct {
+type Jev struct { //nolint:recvcheck // Format takes a value receiver on purpose; see its doc comment.
 	transport *transport.Client
 
 	model string
