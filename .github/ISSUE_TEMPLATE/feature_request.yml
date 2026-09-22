@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest something the client should be able to do.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do
+      description: The problem, rather than the solution you have in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would it look like
+      description: >
+        If you have an API shape in mind, sketch the call. Note that `Set`
+        already covers instruction keys with no typed helper.
+      render: go
