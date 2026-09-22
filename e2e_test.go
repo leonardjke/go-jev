@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/leonardjke/go-jev"
@@ -42,7 +43,7 @@ func newIntegrationClient(t *testing.T) *jev.Jev {
 
 	// The client only logs at debug level, and it logs to the test's own
 	// output so the bodies show up under -v and stay attached to this test.
-	logger := slog.New(slog.NewTextHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
+	logger := slog.New(slog.NewTextHandler(testWriter{t: t}, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
 	client, err := jev.New(apiKey, jev.WithEndpoint(apiUrl), jev.WithLogger(logger))
 	assert.NoError(t, err)
@@ -50,4 +51,17 @@ func newIntegrationClient(t *testing.T) *jev.Jev {
 	fmt.Println("client: ", client)
 
 	return client
+}
+
+// testWriter routes what is written to it through t.Log, so log lines show up
+// under -v and stay attached to the test that produced them. t.Output does
+// this directly, but it landed in Go 1.25 and this module builds on 1.24.
+type testWriter struct {
+	t *testing.T
+}
+
+func (w testWriter) Write(p []byte) (int, error) {
+	w.t.Helper()
+	w.t.Log(strings.TrimSuffix(string(p), "\n"))
+	return len(p), nil
 }
